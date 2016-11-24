@@ -8,10 +8,15 @@ autocmd BufReadPost *
      \   exe "normal! g`\"" |
      \ endif
 
-filetype plugin indent on
-" show existing tab with 4 spaces width
-set tabstop=4
-" when indenting with '>', use 4 spaces width
-"set shiftwidth=4
-" On pressing tab, insert 4 spaces
-"set expandtab
+set nohlsearch
+
+"Indentation
+set tabstop=4 shiftwidth=4 expandtab shiftround
+set autoindent
+set number numberwidth=4
+set showmatch matchtime=2
+
+" Useful maps
+noremap <space> viw
+inoremap <c-d> <esc>ddi
+inoremap <c-u> <esc>viwUi
