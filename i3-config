@@ -149,10 +149,14 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
+set $lockscreen "i3lock -e -c 000000"
+bindsym $mod+shift+w exec $lockscreen
+
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
         status_command i3status
 }
 
-exec --no-startup-id xautolock -time 5 -locker "i3lock -e -c 000000" &
+exec ~/fetch_desktop.sh
+exec --no-startup-id xautolock -time 5 -locker $lockscreen &
