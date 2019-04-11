@@ -158,5 +158,5 @@ bar {
         status_command i3status
 }
 
-exec ~/fetch_desktop.sh
+exec ~/.local/bin/fetch_desktop.sh
 exec --no-startup-id xautolock -time 5 -locker $lockscreen &

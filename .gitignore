@@ -1,0 +1,5 @@
+*.sec*
+/bin/
+!README.md
+!*example
+/Backup/
