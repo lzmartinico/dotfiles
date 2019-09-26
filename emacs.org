@@ -1,0 +1,28 @@
+#+TITLE:    Emacs configuration
+#+AUTHOR:   Lorenzo Martinico
+#+STARTUP:  showall
+#+PROPERTY:   header-args+ :comments both
+#+PROPERTY:   header-args+ :mkdirp yes
+#+PROPERTY:   header-args+ :tangle "~/.emacs"
+
+* Spacemacs configuration file
+** Installed packages
+This is a list of installed packages
+** Init 
+#+BEGIN_SRC elisp
+(setq-default
+dotspacemacs-editing-style 'hybrid
+ dotspacemacs-mode-line-unicode-symbols nil) #(check if we have font?)
+#+END_SRC
+** User init
+** User Configuration
+
+* Solutions
+- https://github.com/sainathadapa/emacs-spacemacs-config
+- https://github.com/ralesi/spacemacs.org
+- https://github.com/ekaschalk/.spacemacs.d
+* Provisional
+For now, we just save the bash script and soft link it to the home directory
+#+BEGIN_SRC sh
+ln -s spacemacs.el ~/.spacemacs
+#+END_SRC

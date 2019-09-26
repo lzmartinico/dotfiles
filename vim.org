@@ -1,0 +1,41 @@
+#+TITLE:    vim configuration
+#+AUTHOR:   Lorenzo Martinico
+#+STARTUP:  showall
+#+PROPERTY:   header-args+ :comments both
+#+PROPERTY:   header-args+ :mkdirp yes
+#+PROPERTY:   header-args+ :tangle "~/.vimrc"
+* Vim configuration
+This is a minimal configuration file to make vim usable 
+Bindings should really be using vimscript rather than conf, but packages need to be evaluated
+** Code specific
+#+BEGIN_SRC conf
+syntax on
+#+END_SRC
+
+We want to limit the length of git commit lines
+#+BEGIN_SRC conf
+autocmd Filetype gitcommit setlocal spell textwidth=72
+#+END_SRC
+** History
+ Return to last edit position when opening files
+
+#+BEGIN_SRC conf
+autocmd BufReadPost *
+     \ if line("'\"") > 0 && line("'\"") <= line("$") |
+     \   exe "normal! g`\"" |
+     \ endif
+#+END_SRC
+
+Do not highlight search results
+#+BEGIN_SRC conf
+set nohlsearch
+#+END_SRC
+
+** Indentation
+
+#+BEGIN_SRC conf
+set tabstop=4 shiftwidth=4 expandtab shiftround
+set autoindent
+set number numberwidth=4
+set showmatch matchtime=2
+#+END_SRC

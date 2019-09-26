@@ -1,0 +1,7 @@
+* Literate Dotfiles
+Dotfiles repository inspired by [To1ne's](https://to1ne.gitlab.io/literate-dotfiles/).
+Requires the installation of Emacs and Org mode
+** TODO reproduce Makefile
+**** TODO convert all dotfiles to literate programming
+** TODO migrate new dotfiles 
+** TODO Figure out prerequisites

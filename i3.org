@@ -1,0 +1,387 @@
+#+TITLE:    i3 configuration
+#+AUTHOR:   Lorenzo Martinico
+#+STARTUP:  showall
+#+PROPERTY:   header-args+ :comments both
+#+PROPERTY:   header-args+ :mkdirp yes
+#+PROPERTY:   header-args+ :tangle "~/.config/i3/config"
+* i3 configuration
+
+Based from the auto-generated file created by i3-config-wizard(1).
+
+Please see https://i3wm.org/docs/userguide.html for a complete
+reference!
+
+** Button configuration
+*** i3 modifier
+
+Make the Windows/Cmd/Whatever key the i3 modifier.
+
+#+BEGIN_SRC conf
+set $mod Mod4
+#+END_SRC
+
+
+** Appearance
+
+Font for window titles. Will also be used by the bar unless a different font is used in the bar {} block below.
+#+BEGIN_SRC conf  
+font pango:monospace 8
+#+END_SRC
+
+This font is widely installed, provides lots of unicode glyphs, right-to-left text rendering and scalability on retina/hidpi displays (thanks to pango).
+#+BEGIN_SRC conf  
+#font pango:DejaVu Sans Mono 8
+#+END_SRC
+
+** Startup programs
+
+The combination of xss-lock, nm-applet and pactl is a popular choice, so they are included here as an example. Modify as you see fit.
+
+NetworkManager is the most popular way to manage wireless networks on Linux, and nm-applet is a desktop environment-independent system tray GUI for it.
+#+BEGIN_SRC conf
+exec --no-startup-id nm-applet
+#+END_SRC
+
+Use pactl to adjust volume in PulseAudio.
+#+BEGIN_SRC conf
+set $refresh_i3status killall -SIGUSR1 i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+#+END_SRC
+
+*** Lockscreen
+
+xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the screen before suspend. Use loginctl lock-session to lock your screen.
+
+Requires xss-lock and systemd
+
+#+BEGIN_SRC conf
+set $lockscreen ~/.local/bin/transfer-sleep-lock-i3lock.sh 
+exec --no-startup-id xss-lock -n /usr/share/doc/xss-lock/dim-screen.sh --transfer-sleep-lock -- $lockscreen --nofork
+bindsym $mod+shift+w exec loginctl lock-session
+#+END_SRC
+
+
+#+BEGIN_SRC conf :tangle "~/.local/bin/transfer-sleep-lock-i3lock.sh" :shebang "#!/bin/bash"
+# Example locker script -- demonstrates how to use the --transfer-sleep-lock 
+# option with i3lock's forking mode to delay sleep until the screen is locked.
+# Modified to take the appropriate i3lock options
+
+## CONFIGURATION ##############################################################
+
+# Options to pass to i3lock
+i3lock_options="-e -c 000000"
+
+# Run before starting the locker
+pre_lock() {
+    #mpc pause
+    return
+}
+
+# Run after the locker exits
+post_lock() {
+    return
+}
+
+###############################################################################
+
+pre_lock
+
+# We set a trap to kill the locker if we get killed, then start the locker and
+# wait for it to exit. The waiting is not that straightforward when the locker
+# forks, so we use this polling only if we have a sleep lock to deal with.
+if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
+    kill_i3lock() {
+        pkill -xu $EUID "$@" i3lock
+    }
+
+    trap kill_i3lock TERM INT
+
+    # we have to make sure the locker does not inherit a copy of the lock fd
+    i3lock $i3lock_options {XSS_SLEEP_LOCK_FD}<&-
+
+    # now close our fd (only remaining copy) to indicate we're ready to sleep
+    exec {XSS_SLEEP_LOCK_FD}<&-
+
+    while kill_i3lock -0; do
+        sleep 0.5
+    done
+else
+    trap 'kill %%' TERM INT
+    i3lock -n $i3lock_options &
+    wait
+fi
+
+post_lock
+#+END_SRC
+
+
+** Mouse
+Use Mouse+$mod to drag floating windows to their wanted position
+#+BEGIN_SRC conf
+floating_modifier $mod
+#+END_SRC
+** Bindings
+use these keys for focus, movement, and resize directions when reaching for the arrows is not convenient
+start a terminal
+#+BEGIN_SRC conf :tangle (unless (file-exists-p "/etc/qubes-release") "~/.config/i3/config")
+bindsym $mod+Return exec i3-sensible-terminal
+#+END_SRC
+#+BEGIN_SRC conf  :tangle (when (file-exists-p "/etc/qubes-release") "~/.config/i3/config")
+bindsym $mod+Return exec qubes-i3-sensible-terminal
+#+END_SRC
+
+kill focused window
+#+BEGIN_SRC conf
+bindsym $mod+Shift+q kill
+#+END_SRC
+
+start dmenu (a program launcher)
+#+BEGIN_SRC conf  :tangle (unless (file-exists-p "/etc/qubes-release") "~/.config/i3/config")
+bindsym $mod+d exec dmenu_run
+#+END_SRC
+
+#+BEGIN_SRC conf  :tangle (when (file-exists-p "/etc/qubes-release") "~/.config/i3/config")
+bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu="dmenu -nb #d2d2d2 -nf #333333 -sb #63a0ff -sf #f5f5f5"
+#+END_SRC
+There also is the (new) i3-dmenu-desktop which only displays applications
+shipping a .desktop file. It is a wrapper around dmenu, so you need that
+installed.
+#+BEGIN_SRC conf
+bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+#+END_SRC
+
+change focus
+#+BEGIN_SRC conf
+bindsym $mod+j focus left
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+k focus down
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+l focus up
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+semicolon focus right
+#+END_SRC
+
+alternatively, you can use the cursor keys:
+#+BEGIN_SRC conf
+bindsym $mod+Left focus left
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Down focus down
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Up focus up
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Right focus right
+#+END_SRC
+
+move focused window
+#+BEGIN_SRC conf
+bindsym $mod+Shift+j move left
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+k move down
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+l move up
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+semicolon move right
+#+END_SRC
+
+alternatively, you can use the cursor keys:
+#+BEGIN_SRC conf
+bindsym $mod+Shift+Left move left
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+Down move down
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+Up move up
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+Shift+Right move right
+#+END_SRC
+
+split in horizontal orientation
+#+BEGIN_SRC conf
+bindsym $mod+h split h
+#+END_SRC
+
+split in vertical orientation
+#+BEGIN_SRC conf
+bindsym $mod+v split v
+#+END_SRC
+
+enter fullscreen mode for the focused container
+#+BEGIN_SRC conf
+bindsym $mod+f fullscreen toggle
+#+END_SRC
+
+change container layout (stacked, tabbed, toggle split)
+#+BEGIN_SRC conf
+bindsym $mod+s layout stacking
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+w layout tabbed
+#+END_SRC
+#+BEGIN_SRC conf
+bindsym $mod+e layout toggle split
+#+END_SRC
+
+toggle tiling / floating
+#+BEGIN_SRC conf
+bindsym $mod+Shift+space floating toggle
+#+END_SRC
+
+change focus between tiling / floating windows
+#+BEGIN_SRC conf
+bindsym $mod+space focus mode_toggle
+#+END_SRC
+
+focus the parent container
+#+BEGIN_SRC conf
+bindsym $mod+a focus parent
+#+END_SRC
+
+focus the child container
+#+BEGIN_SRC conf 
+#bindsym $mod+d focus child
+#+END_SRC
+** Workspaces
+
+Define names for default workspaces for which we configure key bindings later on.
+We use variables to avoid repeating the names in multiple places.
+#+BEGIN_SRC conf
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+#+END_SRC
+
+switch to workspace
+#+BEGIN_SRC conf
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+#+END_SRC
+
+move focused container to workspace
+#+BEGIN_SRC conf
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+#+END_SRC
+
+enable switching back and forth betweekn workspaces
+#+BEGIN_SRC conf
+workspace_auto_back_and_forth yes
+#+END_SRC
+** i3 controls
+
+reload the configuration file
+#+BEGIN_SRC conf
+bindsym $mod+Shift+c reload
+#+END_SRC
+#+BEGIN_SRC conf
+restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+#+END_SRC
+exit i3 (logs you out of your X session)
+#+BEGIN_SRC conf
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+#+END_SRC
+** Resizing
+resize window (you can also use the mouse for that)
+#+BEGIN_SRC conf
+mode "resize" {
+        # These bindings trigger as soon as you enter the resize mode
+
+        # Pressing left will shrink the window’s width.
+        # Pressing right will grow the window’s width.
+        # Pressing up will shrink the window’s height.
+        # Pressing down will grow the window’s height.
+        bindsym j resize shrink width 10 px or 10 ppt
+        bindsym k resize grow height 10 px or 10 ppt
+        bindsym l resize shrink height 10 px or 10 ppt
+        bindsym semicolon resize grow width 10 px or 10 ppt
+
+        # same bindings, but for the arrow keys
+        bindsym Left resize shrink width 10 px or 10 ppt
+        bindsym Down resize grow height 10 px or 10 ppt
+        bindsym Up resize shrink height 10 px or 10 ppt
+        bindsym Right resize grow width 10 px or 10 ppt
+
+        # back to normal: Enter or Escape or $mod+r
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
+}
+
+bindsym $mod+r mode "resize"
+
+#+END_SRC
+** Status bar
+Start i3bar to display a workspace bar (plus the system information i3status finds out, if available)
+#+BEGIN_SRC conf :tangle (unless (file-exists-p "/etc/qubes-release") "~/.config/i3/config")
+bar {
+        status_command i3status
+}
+#+END_SRC
+
+#+BEGIN_SRC conf :tangle (when (file-exists-p "/etc/qubes-release") "~/.config/i3/config") 
+bar {
+        status_command qubes-i3status
+        colors {
+            background #d2d2d2
+            statusline #333333
+
+            #class               #border #backgr #text
+            focused_workspace    #3874d8 #63a0ff #333333
+            active_workspace     #333333 #888888 #f5f5f5
+            inactive_workspace   #888888 #333333 #888888
+            urgent_workspace     #bd2727 #e79e27 #333333
+        }
+}
+#+END_SRC
+
+** Special app configuration 
+# Avoids screen size fingerprinting
+#+BEGIN_SRC conf
+for_window [title="Tor Browser"] floating enable
+#+END_SRC
+** Qubes configuration 
+This are qubes-specific snippets
+Consider replacing selectively (within each section)
+From inside VM, we can check if the kernel release includes qubes
+*** Make sure all xdg autostart entries are started
+This is (among other things) necessary to make sure transient vm's come up
+#+BEGIN_SRC conf :tangle (when (file-exists-p "/etc/qubes-release") "yes")
+exec --no-startup-id qubes-i3-xdg-autostart
+#+END_SRC
