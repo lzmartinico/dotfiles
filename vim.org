@@ -1,12 +1,12 @@
 #+TITLE:    vim configuration
 #+AUTHOR:   Lorenzo Martinico
 #+STARTUP:  showall
-#+PROPERTY:   header-args+ :comments both
+#+PROPERTY:   header-args+ :comments none
 #+PROPERTY:   header-args+ :mkdirp yes
 #+PROPERTY:   header-args+ :tangle "~/.vimrc"
 * Vim configuration
 This is a minimal configuration file to make vim usable 
-Bindings should really be using vimscript rather than conf, but packages need to be evaluated
+Bindings should really be using vimscript rather than conf: comments start with the " character, so we cannot tangle them
 ** Code specific
 #+BEGIN_SRC conf
 syntax on
